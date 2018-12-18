@@ -11,74 +11,45 @@ import java.util.List;
 
 public class DBHandler extends SQLiteOpenHelper {
 
-    // Database Version
-    private static final int DATABASE_VERSION = 1;
-
-    // Database Name
-    private static final String DATABASE_NAME = "studentsInfo";
-
-    // Contacts table name
-    private static final String STUDENTS = "Students";
-
-    // Students Table Columns names
-    private static final String ROLLNO = "rollno";
-    private static final String NAME = "name";
-    private static final String CLASS = "class";
 
     public DBHandler(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        super(context, "studentsInfo", null, 1);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String CREATE_STUDENTS_TABLE = "CREATE TABLE " + STUDENTS + "("
-                + ROLLNO + " INTEGER PRIMARY KEY," + NAME + " TEXT,"
-                + CLASS + " TEXT" + ")";
-        db.execSQL(CREATE_STUDENTS_TABLE);
+        String sql = "CREATE TABLE IF NOT EXISTS students(rollNo INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, studclass TEXT)";
+        db.execSQL(sql);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // Drop older table if existed
-        db.execSQL("DROP TABLE IF EXISTS " + STUDENTS);
+        String sql = "DROP TABLE IF EXISTS students";
+        db.execSQL(sql);
         // Creating tables again
         onCreate(db);
     }
 
     // Adding new student
-    public void addShop(Student student) {
+    public void addStudent(Student student) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(NAME, student.getName()); // Student Name
-        values.put(CLASS, student.getStudClass()); // Student class
+        values.put("rollNo",student.getRollno());
+        values.put("name", student.getName()); // Student Name
+        values.put("studclass", student.getStudClass()); // Student class
 
         // Inserting Row
-        db.insert(STUDENTS, null, values);
+        db.insert("students", null, values);
         db.close(); // Closing database connection
-    }
-
-    // Getting one shop
-    public Student getStudent(int id) {
-        SQLiteDatabase db = this.getReadableDatabase();
-
-        Cursor cursor = db.query(STUDENTS, new String[]{ROLLNO,
-                        NAME, CLASS}, ROLLNO + "=?",
-                new String[]{String.valueOf(id)}, null, null, null, null);
-        if (cursor != null)
-            cursor.moveToFirst();
-
-        Student student = new Student(Integer.parseInt(cursor.getString(0)),
-                cursor.getString(1), cursor.getString(2));
-        // return shop
-        return student;
     }
 
     // Getting All Students
     public List<Student> getAllStudents() {
         List<Student> studentList = new ArrayList<Student>();
         // Select All Query
-        String selectQuery = "SELECT  * FROM " + STUDENTS;
+        String selectQuery = "SELECT  * FROM students";
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
@@ -87,7 +58,7 @@ public class DBHandler extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             do {
                 Student student = new Student();
-                student.setRollno(Integer.parseInt(cursor.getString(0)));
+                student.setRollno(cursor.getInt(0));
                 student.setName(cursor.getString(1));
                 student.setStudClass(cursor.getString(2));
                 // Adding student to list
@@ -99,36 +70,19 @@ public class DBHandler extends SQLiteOpenHelper {
         return studentList;
     }
 
-    // Getting Students Count
-    public int getStudentsCount() {
-        String countQuery = "SELECT  * FROM " + STUDENTS;
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery(countQuery, null);
-        cursor.close();
-
-        // return count
-        return cursor.getCount();
-    }
-
     // Updating a student
-    public int updateStudent(Student student) {
+    public void updateStudent(Student student) {
         SQLiteDatabase db = this.getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put(NAME, student.getName());
-        values.put(CLASS, student.getStudClass());
-
-        // updating row
-        return db.update(STUDENTS, values, ROLLNO + " = ?",
-                new String[]{String.valueOf(student.getRollno())});
+        ContentValues cv = new ContentValues();
+        cv.put("name",student.getName()); //These Fields should be your String values of actual column names
+        cv.put("studclass",student.getStudClass());
+        db.update("students", cv, "rollNo="+student.getRollno(), null);
     }
 
     // Deleting a student
-    public void deleteStudent(Student student) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(STUDENTS, ROLLNO + " = ?",
-                new String[] { String.valueOf(student.getRollno()) });
+    public void deleteStudent(int value) {
+        SQLiteDatabase db=getWritableDatabase();
+        db.execSQL("delete from students where rollNo="+value);
         db.close();
     }
 }
-
