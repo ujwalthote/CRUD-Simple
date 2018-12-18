@@ -1,35 +1,39 @@
 package com.mobilesiri.sqliteexample;
 
+import android.app.Activity;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.widget.TextView;
 
 import java.util.List;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends Activity {
 
+    TextView textView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        textView= (TextView) findViewById(R.id.information);
+
         DBHandler db = new DBHandler(this);
 
-        // Inserting Shop/Rows
+        // Inserting Student/Rows
         Log.d("Insert: ", "Inserting ..");
-        db.addShop(new Shop("Dockers", " 475 Brannan St #330, San Francisco, CA 94107, United States"));
-        db.addShop(new Shop("Dunkin Donuts", "White Plains, NY 10601"));
-        db.addShop(new Shop("Pizza Porlar", "North West Avenue, Boston , USA"));
-        db.addShop(new Shop("Town Bakers", "Beverly Hills, CA 90210, USA"));
+        db.addShop(new Student(1,"abc","1st"));
+        db.addShop(new Student(2,"xyz","2st"));
+        db.addShop(new Student(3,"pqr","3st"));
 
-        // Reading all shops
-        Log.d("Reading: ", "Reading all shops..");
-        List<Shop> shops = db.getAllShops();
+        // Reading all students
+        Log.d("Reading: ", "Reading all students..");
+        List<Student> students = db.getAllStudents();
 
-        for (Shop shop : shops) {
-            String log = "Id: " + shop.getId() + " ,Name: " + shop.getName() + " ,Address: " + shop.getAddress();
-            // Writing shops  to log
-            Log.d("Shop: : ", log);
+        for (Student student : students) {
+            String log = "Id: " + student.getRollno() + " ,Name: " + student.getName() + " ,Address: " + student.getStudClass();
+            // Writing students  to log
+            Log.d("Student: : ", log);
+            textView.append(log + "\n");
         }
     }
 }
